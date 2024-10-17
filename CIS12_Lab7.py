@@ -1,29 +1,29 @@
 #import sys
 alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-def alpha_line(header=' ', index=0):
-    """Prints a header letter and the alphabet with an offset, all separated by pipes."""
-    print(f"| {header} ", end='|')
-    for letter in range(0, 26): # Goes to 26 because of the header column
-        letter_index = alphabet[index % 26]
-        print(f"| {letter_index} ", end='')
-        index += 1
-    print(f"|")
+def get_vigenere_list():
+    rows = []
+    header = '-'
+    for i in range(len(alphabet)+2):
+        row = alphabet[i-2] + alphabet[i-2:] + alphabet[:i-2]
+        if i == 0:
+            row = '#' + alphabet[i:] + alphabet[:i]
+        if i == 1:
+            row = header * (len(alphabet)+1)
+        #print(list(row))
+        rows.append(list(row))
 
-def header_line():
-    """Prints a header and 26 columns of dashes, separated by pipes."""
-    print(f"|---", end='|')
-    for _ in range(26):
-        print(f"|---", end='')
-    print(f"|")
+    return rows
 
-def vigenere_sq(header=' ', index=0):
-    """Prints an initial 27 columns with the alphabet, a header line of dashes, and 26 rows of the alphabet with increasing offsets."""
-    alpha_line(' ')
-    header_line()
-    for index in range(26):
-        header = alphabet[index]
-        alpha_line(header, index)
+def vigenere_sq(rows):
+    get_vigenere_list()
+    for row in rows:
+        if '-' in row[1]:
+            print(f"{'|---' * len(row)}|")
+        else:
+            print(f'| {' | '.join(row)} | ')
+
+vigenere_sq(get_vigenere_list())
 
 def letter_to_index(letter):
     """Converts an alphabetic letter to an index in range 0 - 25."""
@@ -52,4 +52,11 @@ def letter_conversion(char):
     else:
         raise Exception("Input must be a string or an integer.")
 
-print(letter_conversion(' '), "Should be error")
+def vigenere_index(key, ptext):
+    """Converts a single letter from the key and the plaintext and returns a matching ciphertext letter."""
+    k_index = letter_conversion(key)
+    p_index = letter_conversion(ptext)
+    c_index = (k_index + p_index) % 26
+    c_text = letter_conversion(c_index)
+    return c_text
+
