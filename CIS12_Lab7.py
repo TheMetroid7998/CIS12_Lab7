@@ -23,7 +23,7 @@ def vigenere_sq(rows):
         else:
             print(f'| {' | '.join(row)} | ')
 
-vigenere_sq(get_vigenere_list())
+#vigenere_sq(get_vigenere_list())
 
 def letter_to_index(letter):
     """Converts an alphabetic letter to an index in range 0 - 25."""
@@ -59,4 +59,29 @@ def vigenere_index(key, ptext):
     c_index = (k_index + p_index) % 26
     c_text = letter_conversion(c_index)
     return c_text
+
+def plaintext_index(key, ctext):
+    """Converts a single letter from the key and the ciphertext and returns a matching plaintext letter."""
+    k_index = letter_conversion(key)
+    c_index = letter_conversion(ctext)
+    p_index = (c_index - k_index) % 26
+    p_text = letter_conversion(p_index)
+    return p_text
+
+def vigenere_encrypt(key, plaintext):
+    """Encrypts plaintext with a key."""
+    cipherlist = []
+    key_length = len(key)
+    for i, char in enumerate(plaintext): # enumerate keeps track of the index (i) and the character in that place (char)
+        cipherlist.append(vigenere_index(key[i%key_length], char)) # selects a character from key and cycles through the key as needed
+    ciphertext = ''.join(cipherlist)
+    return ciphertext, print(f"Your encrypted text is {ciphertext}.")
+
+def vigenere_decrypt(key, ciphertext):
+    plainlist = []
+    key_length = len(key)
+    for i, char, in enumerate(ciphertext):
+        plainlist.append(plaintext_index(key[i%key_length], char))
+    plaintext = ''.join(plainlist)
+    return plaintext, print(f"Your decrypted text is {plaintext}.")
 
