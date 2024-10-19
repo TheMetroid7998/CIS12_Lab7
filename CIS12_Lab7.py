@@ -2,6 +2,7 @@ import sys
 alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 def get_vigenere_list():
+    """Writes a line using an indexed letter and the alphabet starting from the index/going up to the index."""
     rows = []
     header = '-'
     for i in range(len(alphabet)+2):
@@ -17,6 +18,8 @@ def get_vigenere_list():
 rows = get_vigenere_list()
 
 def vigenere_sq(rows):
+    """Adds more pretty formatting."""
+    print("Printing Vigenère Square...")
     get_vigenere_list()
     for row in rows:
         if '-' in row[1]:
@@ -38,18 +41,26 @@ def index_to_letter(number):
 
 def letter_conversion(char):
     """Determines the type of input, validates it, and passes to the appropriate conversion function."""
-    if isinstance(char, str):
-        if len(char) != 1 or not char.isalpha or char == ' ':
-            raise ValueError("Input must be a single alphabet letter.")
+    try:
+        if isinstance(char, str):
+            if len(char) != 1 or not char.isalpha or char == ' ':
+                raise ValueError("Input must be a single alphabet letter.")
+            else:
+                return letter_to_index(char)
+        elif isinstance(char, int):
+            if 0 <= char <= 25:
+                return index_to_letter(char)
+            else:
+                raise IndexError("Integer must between 0 and 25.")
         else:
-            return letter_to_index(char)
-    elif isinstance(char, int):
-        if 0 <= char <= 25:
-            return index_to_letter(char)
-        else:
-            raise Exception("Integer must between 0 and 25.")
-    else:
-        raise Exception("Input must be a string or an integer.")
+            raise TypeError("Input must be a string or an integer.")
+
+    except (ValueError, TypeError, IndexError) as error:
+        print(f"An error occurred:\n{error}\n")
+        return main_menu()
+    except Exception as error:
+        print(f"An unexpected error occurred:\n{error}\n")
+        return main_menu()
 
 def vigenere_index(key, ptext):
     """Converts a single letter from the key and the plaintext and returns a matching ciphertext letter."""
@@ -68,6 +79,7 @@ def plaintext_index(key, ctext):
     return p_text
 
 def vigenere_encrypt(plaintext, key):
+    """Converts a single letter from the key and the plaintext and returns a matching ciphertext letter."""
     #crypt_menu(mode='Encrypt')
     #key = crypt_menu[1]()
     #plaintext = crypt_menu[0]()
@@ -80,6 +92,7 @@ def vigenere_encrypt(plaintext, key):
     return ciphertext
 
 def vigenere_decrypt(ciphertext, key):
+    """Converts a single letter from the key and the ciphertext and returns a matching plaintext letter."""
     #crypt_menu(mode='Decrypt')
     #key = crypt_menu[1]()
     #ciphertext = crypt_menu[0]()
@@ -91,45 +104,50 @@ def vigenere_decrypt(ciphertext, key):
     print(f"Your decrypted text is {plaintext}.")
     return plaintext
 
-
 menu_list = [
-    ['1. Encrypt', vigenere_encrypt],
-    ['2. Decrypt', vigenere_decrypt],
-    ['3. Print Vigenère Square', vigenere_sq, get_vigenere_list],
+    ['1. Encrypt', lambda: vigenere_encrypt(*crypt_menu(mode='Encrypt'))],
+    ['2. Decrypt', lambda: vigenere_decrypt(*crypt_menu(mode='Decrypt'))],
+    ['3. Print Vigenère Square', lambda: vigenere_sq(get_vigenere_list())],
     ['0. Quit', lambda: sys.exit()],
     [1, 2, 3, 0]
-    ]
+    ] # Used lambdas because they were recommended by ChatGPT, looked into them though.
+      # As I understand it, lambdas are like small, temporary functions for one-time use.
 
 def crypt_menu(mode=''):
+    """Accepts the mode (Encrypt/Decrypt) and collects/validates input as needed
+    before passing the key and the text to the appropriate function."""
     try:
         text = input(f"Please enter the text you wish to {mode}:\n").upper().strip()
         if not all(char in alphabet for char in text):
-            raise Exception("Spaces, numbers, and other ASCII symbols are not valid for this operation.")
+            raise ValueError("Spaces, numbers, and other ASCII symbols are not valid for this operation.")
 
         key = input(f"Please enter the key to {mode} this text with:\n").upper().strip()
-        if not all(char in alphabet for char in text):
-            raise Exception("Spaces, numbers, and other ASCII symbols are not valid for this operation.")
+        if not all(char in alphabet for char in key):
+            raise ValueError("Spaces, numbers, and other ASCII symbols are not valid for this operation.")
 
         return [text, key]
+
+    except ValueError as error:
+        print(f"An error occurred:\n{error}\n")
+        return crypt_menu(mode)
+
     except Exception as error:
-        print(f"An error occurred.\n{error}\nLet's try again.")
+        print(f"An unexpected error occurred:\n{error}\n")
+        return main_menu()
 
 def main_menu():
+    """Lists the possible functions in menu_list, and accepts input
+    before running the appropriate sequence of functions."""
     while True:
-        for i in range(len(menu_list)-1):
+        for i in range(len(menu_list) - 1):
             print(menu_list[i][0])
         try:
             selected = int(input("Make a selection:\n"))
             if selected == 0:
                 print("Exiting...")
                 menu_list[3][1]()
-            elif selected in (1, 2):
-                text, key = crypt_menu(mode='Encrypt' if selected == 1 else 'Decrypt')
-                menu_list[selected - 1][1](text, key)
-            elif selected == 3:
-                print("Printing Vigenère Square...")
-                menu_list[2][1](rows)
-                print("\n")
+            elif selected in (1, 2, 3):
+                menu_list[selected - 1][1]()
             else:
                 raise Exception("Invalid selection, please try again.")
 
